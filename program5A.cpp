@@ -55,7 +55,7 @@ std::tuple<int, int, std::vector<int>> program5A(int n, int W, std::vector<int> 
     memoArray.assign(n + 1, -1); 
     sumOfPriorWidths.assign(n + 1, 0); 
 
-    // Calculate the sum of the widths of all paintings
+    // Calculate the sum of the widths of all paintings before i
     for (int i = 1; i <= n; ++i){
         sumOfPriorWidths[i] = sumOfPriorWidths[i - 1] + widths[i - 1];
     }

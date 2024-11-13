@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <string>
+#include <climits>
 using namespace std;
 
 // helper func for memoization key

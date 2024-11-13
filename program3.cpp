@@ -3,6 +3,7 @@
 #include <tuple>
 #include <algorithm>
 #include <unordered_map>
+#include <string>
 using namespace std;
 
 // helper func for memoization key

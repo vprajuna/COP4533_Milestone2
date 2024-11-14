@@ -1,6 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <tuple>
+#include <algorithm>
+#include <climits>
+
+/*
+  Algorithm 5: Design a (n2) time dynamic programming algorithm for solving ProblemG. 
+  Program5B Give an iterative bottom-up implementation of Algorithm5.
+*/
+
 /* Solution to program 5B
 * @param n the number of paintings
 * @param W the maximum width of the platform
@@ -9,11 +17,56 @@
 * @return a tuple containing the number of platforms used, the optimal total height, and the number of paintings on each platform
 */
 std::tuple<int, int, std::vector<int>> program5B(int n, int W, std::vector<int> heights, std::vector<int> widths){
-    /************************
-    * ADD YOUR CODE HERE *
-    ***********************/
-//    return std::make_tuple(0, 0, std::vector<int>()); // replace with your own result.
-    return std::make_tuple(n, 0, heights);
+    std::vector<int> iterativeOptimalHeight(n + 1, INT_MAX); // Initialize the optimal height array with INT_MAX
+    iterativeOptimalHeight[0] = 0; // Base case
+
+    // Calculate the sum of the widths of all paintings before i
+    std::vector<int> sumOfPriorWidths(n + 1, 0); 
+    for (int i = 1; i <= n; ++i){
+        sumOfPriorWidths[i] = sumOfPriorWidths[i - 1] + widths[i - 1];
+    }
+
+    // Iterative approach to compute the optimal height
+    for (int i = 1; i <= n; ++i){
+        int currentMaxHeight = 0;
+
+        for (int j = i; j > 0; --j){
+            int totalWidth = sumOfPriorWidths[i] - sumOfPriorWidths[j - 1]; // Calculate the total width of the paintings from j to n
+
+            if (totalWidth > W){
+                break; // Total width cannot exceed W
+            }
+
+            currentMaxHeight = std::max(currentMaxHeight, heights[j - 1]); // Compare current height with previous height and update if needed
+            iterativeOptimalHeight[i] = std::min(iterativeOptimalHeight[i], currentMaxHeight + iterativeOptimalHeight[j - 1]); // Update the optimal height
+        }
+    }
+
+    int minHeight = iterativeOptimalHeight[n]; // Minimal height
+
+    std::vector<int> resultingPlatforms; 
+    
+    int i = n; 
+    while (i > 0){
+        int maxHeightPlatform = 0;
+        for (int j = i; j > 0; --j){
+            int totalWidth = sumOfPriorWidths[i] - sumOfPriorWidths[j - 1]; // Calculate the total width of the paintings from j to n
+
+            if (totalWidth > W){
+                break; // Total width cannot exceed W
+            }
+
+            maxHeightPlatform = std::max(maxHeightPlatform, heights[j - 1]); // Compare current height with previous height and update if needed
+            // Group paintings into platforms based on the minimal height
+            if (iterativeOptimalHeight[i] == maxHeightPlatform + iterativeOptimalHeight[j - 1]){
+                resultingPlatforms.push_back(i - j + 1);
+                i = j - 1;
+                break;
+            }
+        }
+    }
+    std::reverse(resultingPlatforms.begin(), resultingPlatforms.end());
+    return std::make_tuple(resultingPlatforms.size(), minHeight, resultingPlatforms);
 }
 int main(){
     int n, W;
@@ -35,20 +88,3 @@ int main(){
     }
     return 0; 
 }
-
-/*
-Problem Definition:
-You are given n paintings, each with a height and a width. You want to display all the paintings on a platform. 
-The platform has a maximum width W. You can place paintings on the platform in any order. 
-However, you can only place a painting on the platform if the total width of the paintings on the platform does not exceed W. 
-If the total width of the paintings on the platform exceeds W, you must start a new platform. 
-The height of a platform is the height of the tallest painting on the platform. 
-Your goal is to minimize the total height of the platforms used to display all the paintings because the height is the cost of it. 
-
- ProblemG:
- Given the heights h1...hn and the base widths w1...wn of n paintings, along with
- the width W of the display platform, nd an arrangement of the paintings on platforms
- that minimizes the total height.
-
- Algorithm 5: Design a (n2) time dynamic programming algorithm for solving ProblemG. Give a top-down recursive implementation of Algorithm5 using memoization.
-*/
